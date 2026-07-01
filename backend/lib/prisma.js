@@ -33,7 +33,7 @@ if (
 	process.env.DATABASE_SSL === "true"
 ) {
 	databaseConfig.ssl = {
-		rejectUnauthorized: false,
+		rejectUnauthorized: true,
 	};
 }
 
