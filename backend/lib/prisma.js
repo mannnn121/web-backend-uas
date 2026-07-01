@@ -6,6 +6,13 @@ const databaseUrl = process.env.DATABASE_URL
 	? new URL(process.env.DATABASE_URL)
 	: null;
 
+console.log("[prisma] DATABASE_URL set:", !!process.env.DATABASE_URL);
+
+if (!process.env.DATABASE_URL && !process.env.DATABASE_HOST) {
+	console.error("[prisma] DATABASE_URL not set — please add it to Railway environment variables");
+	throw new Error("Missing DATABASE_URL environment variable");
+}
+
 const databaseConfig = {
 	host: process.env.DATABASE_HOST || databaseUrl?.hostname || "localhost",
 	port: Number(process.env.DATABASE_PORT || databaseUrl?.port || 3306),
@@ -18,13 +25,15 @@ const databaseConfig = {
 	connectionLimit: 5,
 };
 
+console.log("[prisma] connecting to:", databaseConfig.host, databaseConfig.port, databaseConfig.database);
+
 // this config was intended for the url that has ssl strict params
 if (
 	databaseUrl?.searchParams.get("sslaccept") === "strict" ||
 	process.env.DATABASE_SSL === "true"
 ) {
 	databaseConfig.ssl = {
-		rejectUnauthorized: true,
+		rejectUnauthorized: false,
 	};
 }
 
