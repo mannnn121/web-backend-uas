@@ -2,8 +2,7 @@
 
 import { Surface } from "@heroui/react";
 import useSWR from "swr";
-
-const API_URL = "http://localhost:3000";
+import API_URL from "@/lib/api";
 
 async function fetcher(url) {
   const token = localStorage.getItem("token");

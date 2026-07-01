@@ -12,6 +12,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import useSWRMutation from "swr/mutation";
+import API_URL from "@/lib/api";
 
 async function login(url, { arg }) {
   const response = await fetch(url, {
@@ -34,7 +35,7 @@ async function login(url, { arg }) {
 export default function LoginPage() {
   const router = useRouter();
   const { error, isMutating, trigger } = useSWRMutation(
-    "http://localhost:3000/auth/login",
+    `${API_URL}/auth/login`,
     login,
     {
       onSuccess: (loginData) => {

@@ -7,7 +7,11 @@ import reportRoute from "./routes/report.route.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const allowedOrigins = ["http://localhost:3001", "http://localhost:3002"];
+const allowedOrigins = [
+  "http://localhost:3001",
+  "http://localhost:3002",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
 
 app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());

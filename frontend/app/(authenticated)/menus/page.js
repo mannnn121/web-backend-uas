@@ -11,8 +11,7 @@ import {
 } from "@heroui/react";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
-
-const API_URL = "http://localhost:3000";
+import API_URL from "@/lib/api";
 
 async function menuFetcher(url) {
   const token = localStorage.getItem("token");
