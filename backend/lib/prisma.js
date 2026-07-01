@@ -24,7 +24,7 @@ if (
 	process.env.DATABASE_SSL === "true"
 ) {
 	databaseConfig.ssl = {
-		rejectUnauthorized: process.env.NODE_ENV !== "production",
+		rejectUnauthorized: false,
 	};
 }
 
