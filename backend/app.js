@@ -15,10 +15,10 @@ const allowedOrigins = [
 
 app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
-app.use(authRoute);
-app.use(menuRoute);
-app.use(orderRoute);
-app.use(reportRoute);
+app.use("/api/backend", authRoute);
+app.use("/api/backend", menuRoute);
+app.use("/api/backend", orderRoute);
+app.use("/api/backend", reportRoute);
 
 const startServer = async () => {
   try {
