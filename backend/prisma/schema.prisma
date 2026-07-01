@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// model ingredients {
+//   id            Int     @id @default(autoincrement())
+//   name          String? @db.VarChar(100)
+//   stock         Int?
+//   minimum_stock Int?
+// }
+
+model menus {
+  id            Int           @id @default(autoincrement())
+  name          String?       @db.VarChar(100)
+  price         Decimal?      @db.Decimal(10, 2)
+  stock         Int?          @default(0)
+  minimum_stock Int?          @default(0)
+  is_active     Boolean?      @default(true)
+  order_items   order_items[]
+}
+
+model order_items {
+  id       Int     @id @default(autoincrement())
+  order_id Int
+  menu_id  Int
+  quantity Int
+  price    Decimal @db.Decimal(10, 2)
+  orders   orders  @relation(fields: [order_id], references: [id], onUpdate: Restrict, map: "order_items_ibfk_1")
+  menus    menus   @relation(fields: [menu_id], references: [id], onUpdate: Restrict, map: "order_items_ibfk_2")
+
+  @@index([menu_id], map: "menu_id")
+  @@index([order_id], map: "order_id")
+}
+
+model orders {
+  id                Int             @id @default(autoincrement())
+  user_id           Int?
+  status            orders_status?
+  total_price       Decimal?        @db.Decimal(10, 2)
+  payment_method    payment_method?
+  paid_amount       Decimal?        @db.Decimal(10, 2)
+  change_amount     Decimal?        @db.Decimal(10, 2)
+  payment_reference String?         @db.VarChar(100)
+  payment_status    payment_status?
+  created_at        DateTime        @default(now()) @db.Timestamp(0)
+  order_items       order_items[]
+  users             users?          @relation(fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "orders_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model users {
+  id       Int         @id @default(autoincrement())
+  name     String?     @db.VarChar(100)
+  email    String?     @db.VarChar(100)
+  password String?     @db.VarChar(100)
+  role     users_role?
+  orders   orders[]
+}
+
+enum orders_status {
+  pending
+  completed
+  cancelled
+}
+
+enum payment_method {
+  cash
+  qris
+}
+
+enum payment_status {
+  paid
+  unpaid
+}
+
+enum users_role {
+  admin
+  cashier
+  owner
+}
