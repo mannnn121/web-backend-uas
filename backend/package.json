@@ -9,7 +9,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon app.js",
-    "init-users": "node scripts/init-users.js"
+    "init-users": "node scripts/init-users.js",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.8.0",
