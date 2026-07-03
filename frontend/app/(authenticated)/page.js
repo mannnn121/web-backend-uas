@@ -34,15 +34,15 @@ function formatDate(value) {
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
-  const { data: todayReport, error: todayError } = useSWR(
+  const { data: todayReport, error: todayError, mutate: mutateToday } = useSWR(
     `${API_URL}/reports/today`,
     fetcher,
   );
-  const { data: lowStockMenus, error: lowStockError } = useSWR(
+  const { data: lowStockMenus, error: lowStockError, mutate: mutateLowStock } = useSWR(
     `${API_URL}/reports/low-stock`,
     fetcher,
   );
-  const { data: menus, error: menusError } = useSWR(
+  const { data: menus, error: menusError, mutate: mutateMenus } = useSWR(
     `${API_URL}/menus`,
     fetcher,
   );
@@ -54,6 +54,17 @@ export default function DashboardPage() {
       setUser(JSON.parse(storedUser));
     }
   }, []);
+
+  useEffect(() => {
+    function onOrderCreated() {
+      mutateToday();
+      mutateLowStock();
+      mutateMenus();
+    }
+
+    window.addEventListener("order-created", onOrderCreated);
+    return () => window.removeEventListener("order-created", onOrderCreated);
+  }, [mutateToday, mutateLowStock, mutateMenus]);
 
   const error = todayError || lowStockError || menusError;
 
@@ -128,7 +139,7 @@ export default function DashboardPage() {
                     </tr>
                   : null}
 
-                {todayReport?.orders?.slice(0, 5).map((order) => (
+                {(todayReport?.orders ?? []).slice(0, 5).map((order) => (
                   <tr
                     className="border-border border-b last:border-0"
                     key={order.id}

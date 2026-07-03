@@ -9,7 +9,7 @@ import { authenticate, authorizeRoles } from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 router.use(authenticate);
-router.use(authorizeRoles("admin"));
+router.use(authorizeRoles("admin", "cashier"));
 
 router.get("/reports/today", getTodaySalesReport);
 router.get("/reports/low-stock", getLowStockReport);

@@ -35,9 +35,16 @@ export const getTodaySalesReportService = async () => {
 					gte: start,
 					lt: end,
 				},
+				payment_status: "paid",
 			},
 			include: {
-				users: true,
+				users: {
+					select: {
+						id: true,
+						name: true,
+						email: true,
+					},
+				},
 			},
 			orderBy: {
 				created_at: "desc",

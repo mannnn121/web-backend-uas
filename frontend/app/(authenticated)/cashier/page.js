@@ -150,6 +150,7 @@ export default function CashierPage() {
       setCart([]);
       setPaidAmount("");
       await mutate();
+      window.dispatchEvent(new CustomEvent("order-created"));
     } catch (err) {
       setErrorMessage(err.message);
     } finally {
