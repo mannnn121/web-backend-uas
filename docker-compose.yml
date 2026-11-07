@@ -1,0 +1,77 @@
+services:
+  database:
+    image: mariadb:11.4
+    container_name: pos_mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MARIADB_DATABASE: ${DB_NAME:-pos_db}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mariadb-admin",
+          "ping",
+          "-h",
+          "localhost",
+          "-uroot",
+          "-p${DB_ROOT_PASSWORD:-rootpassword}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - pos-network
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: pos_phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      PMA_HOST: database
+      PMA_PORT: 3306
+    ports:
+      - "8080:80"
+    networks:
+      - pos-network
+
+  # backend:
+  #   build: ./backend
+  #   container_name: pos_backend
+  #   depends_on:
+  #     database:
+  #       condition: service_healthy
+  #   environment:
+  #     DATABASE_URL: "mysql://root:${DB_ROOT_PASSWORD:-rootpassword}@database:3306/${DB_NAME:-pos_db}"
+  #     PORT: 3000
+  #     JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-pos-uas}
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - pos-network
+  #
+  # frontend:
+  #   build: ./frontend
+  #   container_name: pos_frontend
+  #   depends_on:
+  #     - backend
+  #   ports:
+  #     - "3001:3001"
+  #   networks:
+  #     - pos-network
+
+volumes:
+  mariadb_data:
+    name: pos_mariadb_migration_data
+
+networks:
+  pos-network:
+    name: pos-network
+    driver: bridge
