@@ -42,30 +42,33 @@ services:
     networks:
       - pos-network
 
-  # backend:
-  #   build: ./backend
-  #   container_name: pos_backend
-  #   depends_on:
-  #     database:
-  #       condition: service_healthy
-  #   environment:
-  #     DATABASE_URL: "mysql://root:${MARIADB_ROOT_PASSWORD}@database:3306/pos_db"
-  #     PORT: 3000
-  #     JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-pos-uas}
-  #   ports:
-  #     - "3000:3000"
-  #   networks:
-  #     - pos-network
-  #
-  # frontend:
-  #   build: ./frontend
-  #   container_name: pos_frontend
-  #   depends_on:
-  #     - backend
-  #   ports:
-  #     - "3001:3001"
-  #   networks:
-  #     - pos-network
+  backend:
+    build: ./backend
+    container_name: pos_backend
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "mysql://root:${MARIADB_ROOT_PASSWORD}@database:3306/pos_db"
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-pos-uas}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
+    ports:
+      - "3000:3000"
+    networks:
+      - pos-network
+
+  frontend:
+    build: ./frontend
+    container_name: pos_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3001:3001"
+    networks:
+      - pos-network
 
 volumes:
   mariadb_data:
