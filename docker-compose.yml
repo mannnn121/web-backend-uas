@@ -4,8 +4,8 @@ services:
     container_name: pos_mariadb
     restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?set DB_ROOT_PASSWORD in .env}
-      MARIADB_DATABASE: ${DB_NAME:-pos_db}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?set MARIADB_ROOT_PASSWORD in .env}
+      MARIADB_DATABASE: pos_db
     ports:
       - "127.0.0.1:${DB_PORT:-3306}:3306"
     volumes:
@@ -27,7 +27,7 @@ services:
       database:
         condition: service_healthy
     environment:
-      DATABASE_URL: mysql://root:${DB_ROOT_PASSWORD}@database:3306/${DB_NAME:-pos_db}
+      DATABASE_URL: mysql://root:${MARIADB_ROOT_PASSWORD}@database:3306/pos_db
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
       FRONTEND_URL: ${PUBLIC_URL:-http://localhost}
       PORT: 3000

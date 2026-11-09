@@ -98,7 +98,7 @@ jobs:
             [ -f "$f" ] || { echo "::notice::$f not found, container jobs will be skipped"; ready=false; }
           done
           if [ "$ready" = true ]; then
-            services=$(DB_ROOT_PASSWORD=x JWT_SECRET=x docker compose config --services)
+            services=$(MARIADB_ROOT_PASSWORD=x JWT_SECRET=x docker compose config --services)
             for s in database backend frontend proxy; do
               echo "$services" | grep -qx "$s" || { echo "::notice::compose service '$s' not found, container jobs will be skipped"; ready=false; }
             done
@@ -111,7 +111,7 @@ jobs:
     if: needs.detect-containers.outputs.ready == 'true'
     runs-on: ubuntu-latest
     env:
-      DB_ROOT_PASSWORD: ci-root-pass
+      MARIADB_ROOT_PASSWORD: ci-root-pass
       JWT_SECRET: ci-secret
       TAG: ci-${{ github.sha }}
     steps:
