@@ -1,7 +1,9 @@
+import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./docs/swagger.js";
+import { prisma } from "./lib/prisma.js";
 import authRoute from "./routes/auth.route.js";
 import menuRoute from "./routes/menu.route.js";
 import orderRoute from "./routes/order.route.js";
@@ -17,6 +19,21 @@ const allowedOrigins = [
 
 app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
+
+app.get("/api/backend/health", async (req, res) => {
+  try {
+    await Promise.race([
+      prisma.$queryRaw`SELECT 1`,
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("timeout")), 3000),
+      ),
+    ]);
+    res.json({ status: "ok" });
+  } catch {
+    res.status(503).json({ status: "db-unreachable" });
+  }
+});
+
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get("/api-docs.json", (req, res) => res.json(swaggerSpec));
 app.use("/api/backend", authRoute);

@@ -1,17 +1,8 @@
+import { getTodayRange } from "../lib/report-range.js";
 import { prisma } from "../lib/prisma.js";
 
-const getTodayRange = () => {
-	const start = new Date();
-	start.setHours(0, 0, 0, 0);
-
-	const end = new Date(start);
-	end.setDate(end.getDate() + 1);
-
-	return { start, end };
-};
-
 export const getTodaySalesReportService = async () => {
-	const { start, end } = getTodayRange();
+	const { date, start, end } = getTodayRange();
 
 	const [summary, orders] = await Promise.all([
 		prisma.orders.aggregate({
@@ -53,7 +44,7 @@ export const getTodaySalesReportService = async () => {
 	]);
 
 	return {
-		date: start.toISOString().slice(0, 10),
+		date,
 		total_sales: Number(summary._sum.total_price || 0),
 		transaction_count: summary._count.id,
 		orders,
