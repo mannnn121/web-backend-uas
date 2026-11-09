@@ -163,7 +163,11 @@ export default function MenusPage() {
                 name="name"
               >
                 <Label>Name</Label>
-                <Input autoComplete="off" placeholder="Menu name" variant="secondary" />
+                <Input
+                  autoComplete="off"
+                  placeholder="Menu name"
+                  variant="secondary"
+                />
                 <FieldError />
               </TextField>
 
@@ -199,7 +203,13 @@ export default function MenusPage() {
                 type="number"
               >
                 <Label>Stock</Label>
-                <Input autoComplete="off" min="0" placeholder="0" step="1" variant="secondary" />
+                <Input
+                  autoComplete="off"
+                  min="0"
+                  placeholder="0"
+                  step="1"
+                  variant="secondary"
+                />
                 <FieldError />
               </TextField>
 
@@ -216,7 +226,13 @@ export default function MenusPage() {
                 type="number"
               >
                 <Label>Minimum</Label>
-                <Input autoComplete="off" min="0" placeholder="0" step="1" variant="secondary" />
+                <Input
+                  autoComplete="off"
+                  min="0"
+                  placeholder="0"
+                  step="1"
+                  variant="secondary"
+                />
                 <FieldError />
               </TextField>
 

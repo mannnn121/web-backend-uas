@@ -34,18 +34,21 @@ function formatDate(value) {
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
-  const { data: todayReport, error: todayError, mutate: mutateToday } = useSWR(
-    `${API_URL}/reports/today`,
-    fetcher,
-  );
-  const { data: lowStockMenus, error: lowStockError, mutate: mutateLowStock } = useSWR(
-    `${API_URL}/reports/low-stock`,
-    fetcher,
-  );
-  const { data: menus, error: menusError, mutate: mutateMenus } = useSWR(
-    `${API_URL}/menus`,
-    fetcher,
-  );
+  const {
+    data: todayReport,
+    error: todayError,
+    mutate: mutateToday,
+  } = useSWR(`${API_URL}/reports/today`, fetcher);
+  const {
+    data: lowStockMenus,
+    error: lowStockError,
+    mutate: mutateLowStock,
+  } = useSWR(`${API_URL}/reports/low-stock`, fetcher);
+  const {
+    data: menus,
+    error: menusError,
+    mutate: mutateMenus,
+  } = useSWR(`${API_URL}/menus`, fetcher);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");

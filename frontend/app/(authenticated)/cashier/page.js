@@ -44,7 +44,6 @@ export default function CashierPage() {
   const [cart, setCart] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [paidAmount, setPaidAmount] = useState("");
-  const [paymentReference, setPaymentReference] = useState("");
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -138,8 +137,6 @@ export default function CashierPage() {
       await createOrder({
         payment_method: paymentMethod,
         paid_amount: paymentMethod === "qris" ? totalPrice : paidAmount,
-        payment_reference:
-          paymentMethod === "qris" ? paymentReference : undefined,
         items: cart.map((item) => ({
           menu_id: item.menu_id,
           quantity: item.quantity,
@@ -226,18 +223,18 @@ export default function CashierPage() {
                       Rp {Number(item.price).toLocaleString("id-ID")}
                     </p>
                   </div>
-          {errorMessage
-            ? <p className="rounded-lg bg-danger-50 px-3 py-2 text-sm text-danger">
-                {errorMessage}
-              </p>
-            : null}
-          {message
-            ? <p className="rounded-lg bg-success-50 px-3 py-2 text-sm text-success">
-                {message}
-              </p>
-            : null}
+                  {errorMessage
+                    ? <p className="rounded-lg bg-danger-50 px-3 py-2 text-sm text-danger">
+                        {errorMessage}
+                      </p>
+                    : null}
+                  {message
+                    ? <p className="rounded-lg bg-success-50 px-3 py-2 text-sm text-success">
+                        {message}
+                      </p>
+                    : null}
 
-          <Button
+                  <Button
                     size="sm"
                     type="button"
                     variant="ghost"

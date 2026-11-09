@@ -1,0 +1,154 @@
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  backend-ci:
+    name: Backend (test, migrate, health)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      mariadb:
+        image: mariadb:11.4
+        env:
+          MARIADB_ROOT_PASSWORD: ci-root-pass
+          MARIADB_DATABASE: pos_db
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      DATABASE_URL: mysql://root:ci-root-pass@127.0.0.1:3306/pos_db
+      JWT_SECRET: ci-secret
+      PORT: 3000
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npx prisma generate
+      - name: Unit tests
+        run: npm test
+      - name: Apply migrations to an empty database
+        run: npx prisma migrate deploy
+      - name: Check migrations match schema.prisma
+        run: npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code
+      - name: Start the API and check health
+        run: |
+          npm start > server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:3000/api/backend/health; then exit 0; fi
+            sleep 1
+          done
+          cat server.log
+          exit 1
+
+  frontend-ci:
+    name: Frontend (lint, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Lint and format check
+        run: npx biome ci .
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+  detect-containers:
+    name: Detect container setup
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - uses: actions/checkout@v5
+      - id: check
+        run: |
+          ready=true
+          for f in backend/Dockerfile frontend/Dockerfile docker-compose.yml; do
+            [ -f "$f" ] || { echo "::notice::$f not found, container jobs will be skipped"; ready=false; }
+          done
+          if [ "$ready" = true ]; then
+            services=$(MARIADB_ROOT_PASSWORD=x JWT_SECRET=x docker compose config --services)
+            for s in database backend frontend proxy; do
+              echo "$services" | grep -qx "$s" || { echo "::notice::compose service '$s' not found, container jobs will be skipped"; ready=false; }
+            done
+          fi
+          echo "ready=$ready" >> "$GITHUB_OUTPUT"
+
+  compose-smoke-test:
+    name: Compose smoke test
+    needs: [backend-ci, frontend-ci, detect-containers]
+    if: needs.detect-containers.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    env:
+      MARIADB_ROOT_PASSWORD: ci-root-pass
+      JWT_SECRET: ci-secret
+      TAG: ci-${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build and start all containers
+        run: docker compose up -d --build --wait --wait-timeout 180
+      - run: docker compose ps
+      - name: Backend health through the proxy
+        run: curl -fsS http://localhost/api/backend/health
+      - name: Frontend through the proxy
+        run: curl -fsS -o /dev/null http://localhost/
+      - name: Swagger through the proxy
+        run: curl -fsS -o /dev/null http://localhost/api-docs/
+      - name: Container logs
+        if: failure()
+        run: docker compose logs
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
+
+  deploy:
+    name: Deploy to server
+    needs: [compose-smoke-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: self-hosted
+    concurrency:
+      group: production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+      - name: Write .env
+        run: |
+          cat <<EOF > .env
+          MARIADB_ROOT_PASSWORD=${{ secrets.MARIADB_ROOT_PASSWORD }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          FRONTEND_URL=${{ secrets.FRONTEND_URL }}
+          EOF
+      - name: Build & restart containers
+        run: docker compose up -d --build --wait --wait-timeout 180
+      - run: docker compose ps
+      - name: Check the live site
+        run: curl -fsS --retry 5 --retry-delay 5 "http://localhost/api/backend/health"
+      - name: Prune old images
+        run: docker image prune -f

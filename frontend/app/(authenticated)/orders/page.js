@@ -69,6 +69,7 @@ export default function OrdersPage() {
     }
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset on selection change
   useEffect(() => {
     setConfirmDeleteId(null);
   }, [selectedOrder]);

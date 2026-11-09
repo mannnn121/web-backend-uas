@@ -7,8 +7,10 @@
   "type": "module",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "test": "node --test",
     "dev": "nodemon app.js",
+    "db:migrate": "prisma migrate deploy",
     "init-users": "node scripts/init-users.js",
     "db:push": "prisma db push",
     "postinstall": "prisma generate"

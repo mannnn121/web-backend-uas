@@ -199,14 +199,26 @@ export const deleteOrderService = async (orderId) => {
 	const parsedOrderId = parseOrderId(orderId);
 
 	try {
-		await prisma.order_items.deleteMany({
-			where: { order_id: parsedOrderId },
-		});
+		await prisma.$transaction(async (tx) => {
+			const items = await tx.order_items.findMany({
+				where: { order_id: parsedOrderId },
+				select: { menu_id: true, quantity: true },
+			});
 
-		await prisma.orders.delete({
-			where: {
-				id: parsedOrderId,
-			},
+			for (const item of items) {
+				await tx.menus.update({
+					where: { id: item.menu_id },
+					data: { stock: { increment: item.quantity } },
+				});
+			}
+
+			await tx.order_items.deleteMany({
+				where: { order_id: parsedOrderId },
+			});
+
+			await tx.orders.delete({
+				where: { id: parsedOrderId },
+			});
 		});
 
 		return { message: "Order deleted successfully" };

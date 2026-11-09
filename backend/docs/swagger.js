@@ -11,6 +11,10 @@ const options = {
     },
     servers: [
       {
+        url: "/api/backend",
+        description: "Current host",
+      },
+      {
         url: "http://localhost:3000/api/backend",
         description: "Development server",
       },

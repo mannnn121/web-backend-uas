@@ -11,6 +11,7 @@ backend/.env
 # Compressed dump archives (unnecessary duplicate files)
 migration/*.sql.gz
 *.sql.gz
+!backend/prisma/migrations/**/*.sql
 
 # Prisma generated files
 backend/generated/
@@ -26,3 +27,6 @@ yarn-debug.log*
 yarn-error.log*
 .DS_Store
 *.pem
+
+# Local planning notes (not committed)
+/docs/
