@@ -60,7 +60,10 @@ services:
       - pos-network
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000/api/backend}
     container_name: pos_frontend
     restart: unless-stopped
     depends_on:
