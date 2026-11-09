@@ -4,10 +4,10 @@ services:
     container_name: pos_mariadb
     restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
-      MARIADB_DATABASE: ${DB_NAME:-pos_db}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?Set MARIADB_ROOT_PASSWORD in .env}
+      MARIADB_DATABASE: pos_db
     ports:
-      - "${DB_PORT:-3306}:3306"
+      - "3306:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
     healthcheck:
@@ -19,7 +19,7 @@ services:
           "-h",
           "localhost",
           "-uroot",
-          "-p${DB_ROOT_PASSWORD:-rootpassword}",
+          "-p${MARIADB_ROOT_PASSWORD:?Set MARIADB_ROOT_PASSWORD in .env}",
         ]
       interval: 5s
       timeout: 5s
@@ -49,7 +49,7 @@ services:
   #     database:
   #       condition: service_healthy
   #   environment:
-  #     DATABASE_URL: "mysql://root:${DB_ROOT_PASSWORD:-rootpassword}@database:3306/${DB_NAME:-pos_db}"
+  #     DATABASE_URL: "mysql://root:${MARIADB_ROOT_PASSWORD}@database:3306/pos_db"
   #     PORT: 3000
   #     JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-pos-uas}
   #   ports:
