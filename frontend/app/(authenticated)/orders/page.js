@@ -21,6 +21,25 @@ async function fetcher(url) {
   return data;
 }
 
+const PAYMENT_BADGE_STYLES = {
+  cash: "bg-success-soft text-success-soft-foreground",
+  qris: "bg-accent-soft text-accent-soft-foreground",
+};
+
+function PaymentBadge({ method }) {
+  if (!method) {
+    return <span className="text-muted">-</span>;
+  }
+
+  return (
+    <span
+      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase ${PAYMENT_BADGE_STYLES[method] || "bg-surface-secondary text-foreground"}`}
+    >
+      {method}
+    </span>
+  );
+}
+
 async function deleteOrder(orderId) {
   const token = localStorage.getItem("token");
   const response = await fetch(`${API_URL}/orders/${orderId}`, {
@@ -148,8 +167,8 @@ export default function OrdersPage() {
                     <td className="px-6 py-4">
                       {order.users?.name || order.users?.email || "-"}
                     </td>
-                    <td className="px-6 py-4 uppercase">
-                      {order.payment_method || "-"}
+                    <td className="px-6 py-4">
+                      <PaymentBadge method={order.payment_method} />
                     </td>
                     <td className="px-6 py-4 text-right">
                       {formatCurrency(order.total_price)}
@@ -185,9 +204,7 @@ export default function OrdersPage() {
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-muted">Payment</span>
-                  <span className="uppercase">
-                    {selectedOrder.payment_method || "-"}
-                  </span>
+                  <PaymentBadge method={selectedOrder.payment_method} />
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-muted">Status</span>
