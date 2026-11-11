@@ -356,7 +356,7 @@ export default function MenusPage() {
                 >
                   <td className="px-6 py-4">{menu.name}</td>
                   <td className="px-6 py-4">
-                    {Number(menu.price).toLocaleString("id-ID")}
+                    Rp {Number(menu.price).toLocaleString("id-ID")}
                   </td>
                   <td className="px-6 py-4">{menu.stock ?? 0}</td>
                   <td className="px-6 py-4">{menu.minimum_stock ?? 0}</td>
