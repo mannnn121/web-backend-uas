@@ -108,7 +108,7 @@ export const addOrder = async (req, res) => {
  * /orders/{id}:
  *   delete:
  *     tags: [Orders]
- *     summary: Delete an order
+ *     summary: Delete an order (admin only)
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -120,6 +120,8 @@ export const addOrder = async (req, res) => {
  *     responses:
  *       200:
  *         description: Order deleted
+ *       403:
+ *         description: Access denied
  *       404:
  *         description: Order not found
  */
