@@ -185,14 +185,14 @@ export default function CashierPage() {
                 <p className="font-medium text-foreground">{menu.name}</p>
                 <p className="mt-1 text-sm text-muted">
                   Rp {Number(menu.price).toLocaleString("id-ID")}
-                </p>
                 <p
-                  className={`mt-3 text-xs ${(menu.stock ?? 0) <= 0
-                    ? "text-danger"
-                    : (menu.stock ?? 0) <= (menu.minimum_stock ?? 0)
-                      ? "text-warning"
-                      : "text-muted"
-                    }`}
+                  className={`mt-3 text-xs ${
+                    (menu.stock ?? 0) <= 0
+                      ? "text-danger"
+                      : (menu.stock ?? 0) <= (menu.minimum_stock ?? 0)
+                        ? "text-warning"
+                        : "text-muted"
+                  }`}
                 >
                   {(menu.stock ?? 0) <= 0
                     ? "Out of stock"
