@@ -183,11 +183,9 @@ export default function CashierPage() {
                 type="button"
               >
                 <p className="font-medium text-foreground">{menu.name}</p>
-              
                 <p className="mt-1 text-sm text-muted">
                   Rp {Number(menu.price).toLocaleString("id-ID")}
                 </p>
-              
                 <p
                   className={`mt-3 text-xs ${
                     (menu.stock ?? 0) <= 0
